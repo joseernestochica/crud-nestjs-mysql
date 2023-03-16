@@ -1,5 +1,8 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { createQueryBuilder } from 'src/common/helpers';
+import { GetProps } from 'src/common/interfaces/get-props.interface';
+import { GetResponse } from 'src/common/interfaces/get-response.interface';
 import { Repository } from 'typeorm';
 import { CreateUserDto, EditUserDto } from './dtos';
 import { User } from './entities';
@@ -12,14 +15,26 @@ export class UserService {
 		private readonly userRepository: Repository<User>
 	) { }
 
-	async getMany (): Promise<User[]> {
+	async getMany ( getProps: GetProps ): Promise<GetResponse<User>> {
 
 		try {
 
-			const users = await this.userRepository.find();
+			if ( getProps.search && getProps.search !== '' ) {
+				getProps.where = {
+					query: `user.name LIKE :s 
+						OR user.email LIKE :s
+						OR user.surnames LIKE :s
+						OR user.address LIKE :s
+						OR user.phone LIKE :s
+						OR user.postalCode LIKE :s`,
+					params: { s: `%${ getProps.search }%` }
+				}
+			}
 
-			if ( !users || users.length === 0 ) { throw 'Not found' }
-			return users;
+			const getResponse = await createQueryBuilder<User>( this.userRepository, getProps, 'user' );
+
+			if ( !getResponse || getResponse.data.length === 0 ) { throw 'Not found' }
+			return getResponse;
 
 		} catch ( error ) {
 			if ( error === 'Not found' ) { throw new NotFoundException(); }
@@ -72,6 +87,9 @@ export class UserService {
 			return await this.userRepository.save( editedUser );
 
 		} catch ( error ) {
+			if ( ( error as any ).code === 'ER_DUP_ENTRY' ) {
+				throw new BadRequestException( 'Email already exist' );
+			}
 			if ( error === 'Not found' ) { throw new NotFoundException(); }
 			throw new InternalServerErrorException();
 		}

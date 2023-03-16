@@ -12,7 +12,7 @@ export class User {
 	@Column( { type: 'varchar', length: 255, nullable: true } )
 	img?: string;
 
-	@Column( { type: 'varchar', length: 1, nullable: true } )
+	@Column( { type: 'varchar', length: 10, nullable: true } )
 	sex?: string;
 
 	@Column( { name: 'birth_date', type: 'timestamp', nullable: true } )
@@ -51,8 +51,8 @@ export class User {
 	@Column( { type: 'varchar', length: 20, nullable: true } )
 	phone?: string;
 
-	@Column( { name: 'postal_code', type: 'varchar', length: 10, nullable: true } )
-	postalCode?: number;
+	@Column( { name: 'postal_code', type: 'varchar', length: 20, nullable: true } )
+	postalCode?: string;
 
 	@Column( { type: 'varchar', length: 50, nullable: true } )
 	city?: string;

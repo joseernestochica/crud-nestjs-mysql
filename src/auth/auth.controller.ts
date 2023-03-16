@@ -39,7 +39,9 @@ export class AuthController {
 		return {
 			message: 'Profile data',
 			statusCode: 200,
-			data: user
+			data: {
+				user
+			}
 		};
 
 	}

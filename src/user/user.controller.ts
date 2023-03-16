@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, InternalServerErrorException, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { InjectRolesBuilder, RolesBuilder } from 'nest-access-control';
 import { AppResources, AppRoles } from 'src/app.roles';
 import { Auth, User } from 'src/common/decorators';
+import { stringToInt } from 'src/common/helpers/string-to-int.helper';
+import { GetProps } from 'src/common/interfaces/get-props.interface';
 import { CreateUserDto, EditUserDto, UserRegistrationDto } from './dtos';
 import { User as UserEntity } from './entities';
 import { UserService } from './user.service';
@@ -24,13 +26,51 @@ export class UserController {
 		resource: AppResources.USER
 	} )
 	@Get()
-	async getMany () {
+	async getMany (
+		@Query( 'search' ) search?: string | undefined,
+		@Query( 'page' ) page?: string | undefined,
+		@Query( 'limit' ) limit?: string | undefined,
+		@Query( 'sort_c' ) sortC?: string | undefined,
+		@Query( 'sort_d' ) sortD?: 'asc' | 'desc' | undefined,
+		@Query( 'select' ) select?: string | undefined,
+		@Query( 'sg1' ) searchSigle1?: string | undefined,
+		@Query( 'sg2' ) searchSigle2?: string | undefined,
+		@Query( 'sg3' ) searchSigle3?: string | undefined,
+		@Query( 'sg4' ) searchSigle4?: string | undefined,
+	) {
 
-		const data = await this.userService.getMany();
+		const getProps: GetProps = {};
+		getProps.page = page ? stringToInt( page ) > 0 ? stringToInt( page ) : 1 : 1;
+		getProps.limit = limit ? stringToInt( limit ) : 10;
+		getProps.sort = {
+			column: sortC || 'createdAt',
+			direction: sortD ? sortD.toUpperCase() as 'DESC' | 'ASC' : 'DESC'
+		};
+		getProps.select = select && select !== '' ? select.split( '|' ) : [];
+		getProps.search = search && search.trim() !== '' ? search.trim() : undefined;
+
+		getProps.andWhere = [];
+		if ( searchSigle1 && searchSigle1.trim() !== '' ) {
+			getProps.andWhere.push( { field: 'name', value: searchSigle1.trim() } );
+		}
+		if ( searchSigle2 && searchSigle2.trim() !== '' ) {
+			getProps.andWhere.push( { field: 'surnames', value: searchSigle2.trim() } );
+		}
+		if ( searchSigle3 && searchSigle3.trim() !== '' ) {
+			getProps.andWhere.push( { field: 'email', value: searchSigle3.trim() } );
+		}
+		if ( searchSigle4 && searchSigle4.trim() !== '' ) {
+			getProps.andWhere.push( { field: 'isActive', value: searchSigle4.trim() === 'true' ? 1 : 0 } );
+		}
+
+		const getResponse = await this.userService.getMany( getProps );
 		return {
 			message: 'Users list',
 			statusCode: 200,
-			data
+			total: getResponse.total || 0,
+			page: getResponse.page || 1,
+			last_page: getResponse.last_page || 1,
+			data: getResponse.data
 		};
 
 	}
@@ -100,7 +140,7 @@ export class UserController {
 	} )
 	@Put( ':id' )
 	async editOne (
-		@Param( 'id', ParseIntPipe, ) id: number,
+		@Param( 'id', ParseIntPipe ) id: number,
 		@Body() dto: EditUserDto,
 		@User() user: UserEntity
 	) {

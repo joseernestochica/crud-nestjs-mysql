@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsDate, IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsArray, IsBoolean, IsDate, IsDateString, IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 import { AppRoles } from "src/app.roles";
 
 export class CreateUserDto {
@@ -9,13 +9,13 @@ export class CreateUserDto {
 
 	@IsString()
 	@IsOptional()
-	sexo: string;
+	sex: string;
 
-	@IsDate()
+	@IsDateString()
 	@IsOptional()
 	birthDate: Date | null;
 
-	@IsDate()
+	@IsDateString()
 	@IsOptional()
 	createdAt: Date;
 
@@ -38,7 +38,7 @@ export class CreateUserDto {
 	surnames: string;
 
 	@IsString()
-	@MinLength( 8 )
+	@MinLength( 6 )
 	@MaxLength( 100 )
 	password: string;
 
@@ -52,7 +52,7 @@ export class CreateUserDto {
 
 	@IsString()
 	@IsOptional()
-	postalCode: number;
+	postalCode: string;
 
 	@IsString()
 	@IsOptional()

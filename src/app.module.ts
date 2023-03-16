@@ -9,6 +9,8 @@ import { roles } from './app.roles';
 
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { LocationModule } from './location/location.module';
+import { FileModule } from './file/file.module';
 
 @Module( {
   imports: [
@@ -28,7 +30,9 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot( { isGlobal: true, envFilePath: '.env' } ),
     AccessControlModule.forRoles( roles ),
     UserModule,
-    AuthModule
+    AuthModule,
+    LocationModule,
+    FileModule
   ],
   controllers: [ AppController ],
   providers: [ AppService ],

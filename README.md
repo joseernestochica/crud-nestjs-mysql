@@ -64,3 +64,9 @@ $ npm run test:cov
 - Author - [Ernesto Chica](https://www.linkedin.com/in/ernestochica/)
 - Website - [https://nestjs.com](https://www.urbecom.com/)
 
+## Problemas Instalación de sharp
+- Eliminar el directorio ~/./npm/_libvips
+- Eliminar el directorio ~/./npm/_prebuilds
+- Ejecutar npm i sharp --save
+- Ejecutar npm i @types/sharp -D --save
+

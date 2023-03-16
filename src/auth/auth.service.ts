@@ -76,7 +76,7 @@ export class AuthService {
 			if ( !refreshToken || !user || user < 1 ) { throw 'bad resquest'; }
 
 			const count = await this.refreshTokenRepository.count( { where: { userId: user, token: refreshToken, expires: MoreThan( new Date ) } } );
-			if ( count === 0 ) { throw 'not authorized'; }
+			if ( count === 0 ) { throw 'login incorrect'; }
 
 			const userDb = await this.userService.getOne( user );
 			if ( !userDb ) { throw 'not found'; }
@@ -85,7 +85,7 @@ export class AuthService {
 
 		} catch ( error ) {
 			if ( error === 'bad resquest' ) { throw new InternalServerErrorException(); }
-			if ( error === 'not authorized' ) { throw new UnauthorizedException(); }
+			if ( error === 'login incorrect' ) { throw new UnauthorizedException( error ); }
 			if ( error === 'not found' ) { throw new NotFoundException(); }
 			throw new BadRequestException();
 		}
